@@ -1,0 +1,96 @@
+/* style.css */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #000; /* Nền đen tuyền */
+    color: #fff;
+    transition: background-color 0.5s;
+    user-select: none; /* Không cho bôi đen chữ */
+}
+
+/* Giao diện người gửi (Sender) - Màu sáng */
+body.sender-theme {
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+/* Giao diện người nhận (Receiver) - Màu tối */
+body.receiver-theme {
+    background-color: #000;
+    color: #fff;
+}
+
+/* Container chính */
+.container {
+    width: 90%;
+    max-width: 600px;
+}
+
+/* Tiêu đề */
+h1, h2 {
+    font-size: 6vmin; /* Tự động to theo màn hình */
+    margin-bottom: 4vmin;
+}
+
+/* Menu chọn người */
+select {
+    width: 100%;
+    padding: 3vmin;
+    font-size: 5vmin;
+    border-radius: 15px;
+    border: 2px solid #ccc;
+    margin-bottom: 5vmin;
+    background: white;
+}
+
+/* Nút bấm chung */
+.btn {
+    width: 100%;
+    padding: 4vmin; /* Nút to, dễ bấm */
+    font-size: 5vmin;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-bottom: 3vmin;
+    transition: transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Màu sắc nút */
+.btn-green { background-color: #34c759; color: white; }
+.btn-red { background-color: #ff3b30; color: white; }
+.btn-blue { background-color: #007aff; color: white; }
+
+/* Trạng thái trên iPhone */
+.status-big {
+    font-size: 8vmin;
+    color: #ffcc00;
+    font-weight: bold;
+    animation: flash 1s infinite;
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Nền đỏ cảnh báo khi có người về */
+body.alert-mode {
+    background-color: #8b0000 !important;
+}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chuông Báo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body class="sender-theme">
+    <div class="container">
+        <h2>Chuông Báo Về Nhà</h2>
+        
+        <select id="personSelect">
+            <option value="Bố">Bố Mười</option>
+            <option value="Mẹ">Mẹ Thu</option>
+            <option value="Anh">Con Đạt</option>
+            <option value="Em">Con Thành</option>
+        </select>
+
+        <button class="btn btn-green" onclick="sendSignal('START')">BÁO VỀ NHÀ</button>
+        <button class="btn btn-red" onclick="sendSignal('STOP')">TẮT CHUÔNG</button>
+
+        <p id="log" style="margin-top: 20px; font-size: 3vmin; color: #666;">Sẵn sàng...</p>
+    </div>
+
+    <script src="/js/config.js"></script>
+    <script src="/js/sender.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Receiver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body class="receiver-theme">
+    <div class="container">
+        <div id="init-screen">
+            <h2>LOA THÔNG MINH</h2>
+            <button class="btn btn-blue" onclick="initAudio()">KÍCH HOẠT</button>
+            <p style="margin-top: 10px; font-size: 3vmin; color: #888;">Nhấn để kết nối với Sender</p>
+        </div>
+
+        <div id="active-screen" style="display:none;">
+            <div id="status-text" style="font-size: 5vmin;">ĐANG TRỰC...</div>
+        </div>
+    </div>
+
+    <audio id="ringtone" src="Radian.mp3" loop preload="auto"></audio>
+
+    <script src="/js/config.js"></script>
+    <script src="/js/receiver.js"></script>
+</body>
+</html>
