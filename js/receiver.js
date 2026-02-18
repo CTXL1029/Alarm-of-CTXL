@@ -2,19 +2,40 @@
 const audio = document.getElementById('ringtone');
 const statusText = document.getElementById('status-text');
 const body = document.body;
+const container = document.querySelector('.container');
 let isFirstLoad = true;
+let idleTimer;
 
-// Xử lý lỗi nếu file âm thanh hỏng
+// --- Chức năng làm mờ màn hình ---
+function resetTimer() {
+    // Sáng màn hình lại
+    container.classList.remove('dimmed');
+    
+    // Xóa bộ đếm cũ
+    clearTimeout(idleTimer);
+    
+    // Thiết lập bộ đếm mới: sau 6s sẽ mờ đi
+    idleTimer = setTimeout(() => {
+        container.classList.add('dimmed');
+    }, 6000); 
+}
+
+// Lắng nghe tương tác người dùng để làm sáng màn hình
+window.addEventListener('touchstart', resetTimer);
+window.addEventListener('mousemove', resetTimer); // Dự phòng cho PC
+
+// --------------------------------
+
 audio.onerror = function() {
     statusText.innerText = "⚠️ Lỗi tải file nhạc!";
     statusText.style.color = "red";
 };
 
 function initAudio() {
-    // Mồi âm thanh cho iOS
     audio.play().then(() => {
         audio.pause();
         switchToActiveMode();
+        resetTimer(); // Bắt đầu tính giờ sau khi kích hoạt
     }).catch((err) => {
         alert("Vui lòng chạm vào màn hình lần nữa!");
     });
@@ -28,7 +49,6 @@ function switchToActiveMode() {
 
 function listenToFirebase() {
     db.ref('alarm_status').on('value', (snapshot) => {
-        // Bỏ qua lần load đầu tiên để tránh chuông tự kêu
         if (isFirstLoad) {
             isFirstLoad = false;
             return;
@@ -38,24 +58,24 @@ function listenToFirebase() {
         if (!data) return;
 
         if (data.command === "START") {
-            // 1. Phát nhạc
+            resetTimer(); // Làm sáng màn hình ngay khi có tín hiệu
+            
             audio.currentTime = 0;
             audio.play().catch(e => console.log("Lỗi phát:", e));
 
-            // 2. Cập nhật giao diện báo động
             statusText.innerHTML = `${data.name}<br>ĐÃ VỀ!`;
-            statusText.className = "status-big"; // Chữ to, nhấp nháy
-            body.className = "receiver-theme alert-mode"; // Nền đỏ
+            statusText.className = "status-big";
+            body.className = "receiver-theme alert-mode";
 
         } else if (data.command === "STOP") {
-            // 1. Tắt nhạc
             audio.pause();
             audio.currentTime = 0;
 
-            // 2. Trả về giao diện bình thường
             statusText.innerText = "ĐANG TRỰC...";
             statusText.className = "";
-            body.className = "receiver-theme"; // Nền đen
+            body.className = "receiver-theme";
+            
+            resetTimer(); // Sáng lại khi tắt chuông để người dùng thấy trạng thái
         }
     });
 }

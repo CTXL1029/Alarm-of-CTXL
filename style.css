@@ -94,3 +94,13 @@ select {
 body.alert-mode {
     background-color: #8b0000 !important;
 }
+
+/* Thêm vào cuối file style.css */
+.container {
+    transition: opacity 2s ease-in-out; /* Hiệu ứng mờ dần trong 2 giây */
+}
+
+.container.dimmed {
+    opacity: 0.1; /* Độ mờ khi ở trạng thái nghỉ (10%) */
+    pointer-events: none; /* Tránh bấm nhầm khi màn hình đang tối */
+}
