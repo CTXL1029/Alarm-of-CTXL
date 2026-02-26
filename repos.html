@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repo Manager - iPhone 6</title>
+    <style>
+        :root {
+            --cydia-color: #9c71d0;
+            --zebra-color: #4a4a4a;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f2f2f7;
+            margin: 0;
+            padding: 20px;
+            color: #1c1c1e;
+        }
+        h2 { text-align: center; margin-bottom: 20px; font-weight: 700; }
+        
+        /* Tab Switcher */
+        .tab-wrapper {
+            display: flex;
+            background: #e3e3e8;
+            border-radius: 12px;
+            padding: 2px;
+            margin-bottom: 25px;
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Danh sách nút tràn màn hình */
+        .container {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .container.active { display: flex; }
+
+        .repo-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 18px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            -webkit-tap-highlight-color: transparent;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .repo-card:active { transform: scale(0.97); background: #f9f9f9; }
+
+        .info { text-align: left; flex: 1; margin-right: 10px; }
+        .name { display: block; font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+        .url { display: block; font-size: 12px; color: #8e8e93; word-break: break-all; }
+
+        .add-badge {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        
+        .cydia-btn { color: var(--cydia-color); background: #f3ebff; }
+        .zebra-btn { color: var(--zebra-color); background: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <h2>📦 Repo Manager</h2>
+
+    <div class="tab-wrapper">
+        <button class="tab-btn active" onclick="switchTab('cydia')">Repo cho Cydia</button>
+        <button class="tab-btn" onclick="switchTab('zebra')">Repo cho Zebra</button>
+    </div>
+
+    <div id="cydia" class="container active"></div>
+
+    <div id="zebra" class="container"></div>
+
+    <script>
+        // Phân loại chính xác theo file repos.txt 
+        const cydiaRepos = [
+            { name: "Bingner", url: "https://apt.bingner.com/" },
+            { name: "BigBoss", url: "http://apt.thebigboss.org/repofiles/cydia/" },
+            { name: "Chariz", url: "https://repo.chariz.com/" },
+            { name: "Dynastic", url: "https://repo.dynastic.co/" },
+            { name: "Limneos", url: "https://limneos.net/repo/" },
+            { name: "ModMyi", url: "http://modmyi.saurik.com/" },
+            { name: "rpetrich", url: "https://rpetri.ch/repo/" },
+            { name: "Zebra", url: "https://getzebra.com/repo/" }
+        ];
+
+        const zebraRepos = [
+            { name: "BigBoss", url: "http://apt.thebigboss.org/repofiles/cydia/" },
+            { name: "Bingner", url: "https://apt.bingner.com/" },
+            { name: "Chariz", url: "https://repo.chariz.com/" },
+            { name: "CoreUX", url: "https://therealhoodboy.github.io/coreux/" },
+            { name: "Saurik", url: "http://apt.saurik.com/" },
+            { name: "Dynastic", url: "https://repo.dynastic.co/" },
+            { name: "Havoc", url: "https://havoc.app/" },
+            { name: "ichitaso", url: "https://cydia.ichitaso.com/" },
+            { name: "iPhone/iPad Jailbreak", url: "https://jtisvn.github.io/" },
+            { name: "julioverne", url: "https://julioverne.github.io/" },
+            { name: "Limneos", url: "https://limneos.net/repo/" },
+            { name: "Luki120", url: "https://luki120.github.io/" },
+            { name: "A-Font (rpgfarm)", url: "https://repo.rpgfarm.com/" },
+            { name: "MTAC", url: "https://mtac.app/repo/" },
+            { name: "The Odyssey", url: "https://repo.theodyssey.dev/" },
+            { name: "Packix", url: "https://repo.packix.com/" },
+            { name: "PoomSmart", url: "https://poomsmart.github.io/repo/" },
+            { name: "rpetrich", url: "https://rpetri.ch/repo/" },
+            { name: "Skitty", url: "https://skitty.xyz/repo/" },
+            { name: "SparkDev", url: "https://sparkdev.me/" },
+            { name: "tateu", url: "https://tateu.net/repo/" },
+            { name: "udevs", url: "https://udevsharold.github.io/repo/" },
+            { name: "VintageRepo", url: "https://ivintagelover.github.io/repo/" },
+            { name: "Zebra", url: "https://getzebra.com/repo/" },
+            { name: "ZX02", url: "https://zerui18.github.io/zx02/" }
+        ];
+
+        function render() {
+            const cydiaContainer = document.getElementById('cydia');
+            const zebraContainer = document.getElementById('zebra');
+
+            cydiaRepos.forEach(repo => {
+                cydiaContainer.innerHTML += `
+                    <a href="cydia://source/${repo.url}" class="repo-card">
+                        <div class="info">
+                            <span class="name">${repo.name}</span>
+                            <span class="url">${repo.url}</span>
+                        </div>
+                        <div class="add-badge cydia-btn">Thêm vào Cydia</div>
+                    </a>`;
+            });
+
+            zebraRepos.forEach(repo => {
+                zebraContainer.innerHTML += `
+                    <a href="zbra://sources/add/${repo.url}" class="repo-card">
+                        <div class="info">
+                            <span class="name">${repo.name}</span>
+                            <span class="url">${repo.url}</span>
+                        </div>
+                        <div class="add-badge zebra-btn">Thêm vào Zebra</div>
+                    </a>`;
+            });
+        }
+
+        function switchTab(type) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(type).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        render();
+    </script>
+</body>
+</html>
