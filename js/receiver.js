@@ -4,22 +4,27 @@ const statusText = document.getElementById('status-text');
 const body = document.body;
 const container = document.querySelector('.container');
 let isFirstLoad = true;
+let isStart = false;
 let idleTimer;
 
-listenToFirebase();
 
-// --- Chức năng làm mờ màn hình ---
 function resetTimer() {
     container.classList.remove('dimmed');
     clearTimeout(idleTimer);
-    
-    idleTimer = setTimeout(() => {
-        container.classList.add('dimmed');
-    }, 6000); 
+    if (isStart) {
+        idleTimer = setTimeout(() => {
+            container.classList.add('dimmed');
+        }, 30000); 
+    }
+    else if (!isStart) {
+        idleTimer = setTimeout(() => {
+            container.classList.add('dimmed');
+        }, 6000);
+    }
 }
 
 window.addEventListener('touchstart', resetTimer);
-window.addEventListener('mousemove', resetTimer);
+window.addEventListener('mousemove', resetTimer); // Dự phòng cho PC
 
 // --------------------------------
 
@@ -55,9 +60,8 @@ function listenToFirebase() {
         if (!data) return;
 
         if (data.command === "START") {
-            while (data.command === "START") {
-                resetTimer();
-            }
+            isStart = true;
+            resetTimer();
             
             audio.currentTime = 0;
             audio.play().catch(e => console.log("Lỗi phát:", e));
@@ -67,6 +71,7 @@ function listenToFirebase() {
             body.className = "receiver-theme alert-mode";
 
         } else if (data.command === "STOP") {
+            isStart = false;
             audio.pause();
             audio.currentTime = 0;
 
