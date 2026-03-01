@@ -6,23 +6,20 @@ const container = document.querySelector('.container');
 let isFirstLoad = true;
 let idleTimer;
 
+listenToFirebase();
+
 // --- Chức năng làm mờ màn hình ---
 function resetTimer() {
-    // Sáng màn hình lại
     container.classList.remove('dimmed');
-    
-    // Xóa bộ đếm cũ
     clearTimeout(idleTimer);
     
-    // Thiết lập bộ đếm mới: sau 6s sẽ mờ đi
     idleTimer = setTimeout(() => {
         container.classList.add('dimmed');
     }, 6000); 
 }
 
-// Lắng nghe tương tác người dùng để làm sáng màn hình
 window.addEventListener('touchstart', resetTimer);
-window.addEventListener('mousemove', resetTimer); // Dự phòng cho PC
+window.addEventListener('mousemove', resetTimer);
 
 // --------------------------------
 
@@ -35,7 +32,7 @@ function initAudio() {
     audio.play().then(() => {
         audio.pause();
         switchToActiveMode();
-        resetTimer(); // Bắt đầu tính giờ sau khi kích hoạt
+        resetTimer();
     }).catch((err) => {
         alert("Vui lòng chạm vào màn hình lần nữa!");
     });
@@ -58,7 +55,9 @@ function listenToFirebase() {
         if (!data) return;
 
         if (data.command === "START") {
-            resetTimer(); // Làm sáng màn hình ngay khi có tín hiệu
+            while (data.command === "START") {
+                resetTimer();
+            }
             
             audio.currentTime = 0;
             audio.play().catch(e => console.log("Lỗi phát:", e));
