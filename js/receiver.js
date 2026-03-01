@@ -5,70 +5,77 @@ const body = document.body;
 const container = document.querySelector('.container');
 let isFirstLoad = true;
 let idleTimer;
-let canPlayAudio = false; // Biến kiểm soát quyền phát nhạc
 
-// Tự động chạy ngay khi load trang
-listenToFirebase();
-
+// --- Chức năng làm mờ màn hình ---
 function resetTimer() {
+    // Sáng màn hình lại
     container.classList.remove('dimmed');
+    
+    // Xóa bộ đếm cũ
     clearTimeout(idleTimer);
+    
+    // Thiết lập bộ đếm mới: sau 6s sẽ mờ đi
     idleTimer = setTimeout(() => {
         container.classList.add('dimmed');
     }, 6000); 
 }
 
+// Lắng nghe tương tác người dùng để làm sáng màn hình
 window.addEventListener('touchstart', resetTimer);
-window.addEventListener('mousemove', resetTimer);
+window.addEventListener('mousemove', resetTimer); // Dự phòng cho PC
+
+// --------------------------------
 
 audio.onerror = function() {
     statusText.innerText = "⚠️ Lỗi tải file nhạc!";
     statusText.style.color = "red";
 };
 
-// Hàm này giờ chỉ làm nhiệm vụ "xin quyền" phát nhạc từ trình duyệt
 function initAudio() {
     audio.play().then(() => {
         audio.pause();
-        canPlayAudio = true; // Đã có quyền phát nhạc
-        document.getElementById('init-screen').style.display = 'none';
-        document.getElementById('active-screen').style.display = 'block';
-        resetTimer();
+        switchToActiveMode();
+        resetTimer(); // Bắt đầu tính giờ sau khi kích hoạt
     }).catch((err) => {
-        alert("Vui lòng chạm vào nút KÍCH HOẠT!");
+        alert("Vui lòng chạm vào màn hình lần nữa!");
     });
 }
 
+function switchToActiveMode() {
+    document.getElementById('init-screen').style.display = 'none';
+    document.getElementById('active-screen').style.display = 'block';
+    listenToFirebase();
+}
+
 function listenToFirebase() {
-    // Luôn lắng nghe Firebase bất kể đã bấm nút hay chưa
     db.ref('alarm_status').on('value', (snapshot) => {
+        if (isFirstLoad) {
+            isFirstLoad = false;
+            return;
+        }
+
         const data = snapshot.val();
         if (!data) return;
 
-        // Cập nhật trạng thái văn bản ngay lập tức
         if (data.command === "START") {
-            resetTimer();
+            resetTimer(); // Làm sáng màn hình ngay khi có tín hiệu
+            
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Lỗi phát:", e));
+
             statusText.innerHTML = `${data.name}<br>ĐÃ VỀ!`;
             statusText.className = "status-big";
             body.className = "receiver-theme alert-mode";
-            
-            // Chỉ phát nhạc nếu đã nhấn nút kích hoạt trước đó
-            if (canPlayAudio) {
-                audio.currentTime = 0;
-                audio.play().catch(e => console.log("Lỗi phát:", e));
-            } else {
-                console.log("Đã nhận tín hiệu nhưng chưa có quyền phát âm thanh.");
-            }
 
         } else if (data.command === "STOP") {
-            if (canPlayAudio) {
-                audio.pause();
-                audio.currentTime = 0;
-            }
+            audio.pause();
+            audio.currentTime = 0;
+
             statusText.innerText = "ĐANG TRỰC...";
             statusText.className = "";
             body.className = "receiver-theme";
-            resetTimer();
+            
+            resetTimer(); // Sáng lại khi tắt chuông để người dùng thấy trạng thái
         }
     });
 }
