@@ -11,18 +11,10 @@
 </head>
 <body class="receiver-theme">
     <div class="container">
-        <div id="init-screen">
-            <h2>LOA THÔNG MINH</h2>
-            <button class="btn btn-blue" onclick="initAudio()">KÍCH HOẠT</button>
-            <p style="margin-top: 10px; font-size: 3vmin; color: #888;">Nhấn để kết nối với Sender</p>
-        </div>
-
-        <div id="active-screen" style="display:none;">
-            <div id="status-text" style="font-size: 5vmin;">ĐANG TRỰC...</div>
+        <div id="active-screen">
+            <div id="status-text" style="font-size: 5vmin;">ĐANG CHỜ...</div>
         </div>
     </div>
-
-    <audio id="ringtone" src="Radian.mp3" loop preload="auto"></audio>
 
     <script src="js/config.js"></script>
     <script src="js/receiver.js"></script>

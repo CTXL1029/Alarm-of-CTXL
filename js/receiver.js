@@ -1,52 +1,43 @@
 // receiver.js
-const audio = document.getElementById('ringtone');
 const statusText = document.getElementById('status-text');
 const body = document.body;
 const container = document.querySelector('.container');
 let isFirstLoad = true;
-let isStart = false;
 let idleTimer;
 
+// Hàm lấy tên từ URL (ví dụ: #Bố%20Mười)
+function getNameFromURL() {
+    const hash = window.location.hash.substring(1); 
+    return hash ? decodeURIComponent(hash) : "";
+}
 
 function resetTimer() {
     container.classList.remove('dimmed');
     clearTimeout(idleTimer);
-    if (isStart) {
-        idleTimer = setTimeout(() => {
-            container.classList.add('dimmed');
-        }, 30000); 
-    }
-    else if (!isStart) {
-        idleTimer = setTimeout(() => {
-            container.classList.add('dimmed');
-        }, 6000);
-    }
+    // iOS 12: Giữ sáng 30s khi có báo động, 6s khi bình thường
+    const delay = body.classList.contains('alert-mode') ? 30000 : 6000;
+    idleTimer = setTimeout(() => {
+        container.classList.add('dimmed');
+    }, delay);
 }
 
-window.addEventListener('touchstart', resetTimer);
-window.addEventListener('mousemove', resetTimer); // Dự phòng cho PC
-
-// --------------------------------
-
-audio.onerror = function() {
-    statusText.innerText = "⚠️ Lỗi tải file nhạc!";
-    statusText.style.color = "red";
-};
-
-function initAudio() {
-    audio.play().then(() => {
-        audio.pause();
-        switchToActiveMode();
-        resetTimer();
-    }).catch((err) => {
-        alert("Vui lòng chạm vào màn hình lần nữa!");
-    });
-}
-
-function switchToActiveMode() {
-    document.getElementById('init-screen').style.display = 'none';
-    document.getElementById('active-screen').style.display = 'block';
+// Tự động chạy khi trang tải xong
+document.addEventListener("DOMContentLoaded", function() {
+    const personName = getNameFromURL();
+    
+    if (personName) {
+        showAlert(personName);
+    }
+    
     listenToFirebase();
+    resetTimer();
+});
+
+function showAlert(name) {
+    statusText.innerHTML = `${name}<br>ĐÃ VỀ!`;
+    statusText.className = "status-big";
+    body.className = "receiver-theme alert-mode";
+    resetTimer();
 }
 
 function listenToFirebase() {
@@ -60,26 +51,17 @@ function listenToFirebase() {
         if (!data) return;
 
         if (data.command === "START") {
-            isStart = true;
-            resetTimer();
-            
-            audio.currentTime = 0;
-            audio.play().catch(e => console.log("Lỗi phát:", e));
-
-            statusText.innerHTML = `${data.name}<br>ĐÃ VỀ!`;
-            statusText.className = "status-big";
-            body.className = "receiver-theme alert-mode";
-
+            // Ưu tiên tên từ URL Hash, nếu không có mới dùng tên từ Firebase
+            const personName = getNameFromURL() || data.name;
+            showAlert(personName);
         } else if (data.command === "STOP") {
-            isStart = false;
-            audio.pause();
-            audio.currentTime = 0;
-
             statusText.innerText = "ĐANG TRỰC...";
             statusText.className = "";
             body.className = "receiver-theme";
-            
-            resetTimer(); // Sáng lại khi tắt chuông để người dùng thấy trạng thái
+            window.location.hash = ""; 
+            resetTimer();
         }
     });
 }
+
+window.addEventListener('touchstart', resetTimer);
